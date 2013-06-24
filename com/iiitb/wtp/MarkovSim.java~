@@ -29,7 +29,7 @@ import org.jsoup.select.Elements;
 import com.iiitb.model.SeedHandler;
 /**
  * 
- * @co-author Puneeth Narayana and Sindhu Priyadarshini
+ * @co-author Puneeth Narayana, Amulya Kishore and Sindhu Priyadarshini
  *
  */
 public class MarkovSim {
