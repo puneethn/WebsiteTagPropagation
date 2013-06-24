@@ -21,6 +21,8 @@ import java.util.TreeMap;
  * - Remove trailing slash.
  * - Sort the query string params.
  * - Remove some query string params like "utm_*" and "*session*".
+ * 
+ *  Ref : http://www.stackoverflow.com
  */
 public class NormalizeURL
 {

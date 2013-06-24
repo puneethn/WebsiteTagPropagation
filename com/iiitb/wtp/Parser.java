@@ -13,7 +13,11 @@ import java.util.Set;
 import org.apache.http.client.ClientProtocolException;
 
 import com.iiitb.model.SeedHandler;
-
+/**
+ * 
+ * @author Puneeth Narayana
+ *
+ */
 public class Parser {
 
 	String pageSource = null;
@@ -24,22 +28,36 @@ public class Parser {
 	Double DocSimScore;
 	MarkovSim ms = new MarkovSim();
 
+	/**
+	 * Parse the url and crawl through the webpage
+	 * @param contentOfPage
+	 * @param url
+	 * @param tagDV
+	 * @return
+	 * @throws SQLException
+	 * @throws IOException
+	 */
 	public Set<String> parse(String contentOfPage, String url,
 			Map<String, DocumentVector> tagDV) throws SQLException, IOException {
 
 		// Find if there are any hyper links. Add it to the crawl frontier.
 		return hyperlinksExtractor(url, contentOfPage, tagDV);
-		// return urlList;
 
 	}
 
+	/**
+	 * Extract the hyperlinks from the given url after normalizing the url
+	 * @param url
+	 * @param contentOfPage
+	 * @param tagDV
+	 * @return
+	 * @throws SQLException
+	 * @throws IOException
+	 */
 	private Set<String> hyperlinksExtractor(String url, String contentOfPage,
 			Map<String, DocumentVector> tagDV) throws SQLException, IOException {
-		// db = new SeedHandler();
 		NormalizeURL nURL = new NormalizeURL();
 
-		// Map<String, Map<String, DocumentVector>> list = new HashMap<>();
-		// ArrayList<String> list = new ArrayList<>();
 		Set<String> list = new HashSet<String>();
 		String link = "";
 		addvector(url, contentOfPage, tagDV);
@@ -50,23 +68,14 @@ public class Parser {
 		String temp1[], temp2[];
 		int i = 1;
 
-		// dbConn.insertSearchedData(url, tag);
 		try {
 			for (i = 1; i < ref2.length; i++) {
 				temp1 = ref2[i].split("\"");
 				link = "http://" + temp1[0];
 
-				// if (link.contains("#"))
-				// System.out.println("contains #");
 				URL connect = new URL(link);
 				URLConnection yc = connect.openConnection();
 				link = nURL.normalize(link);
-				/*
-				 * if(connect.getRef() != null){
-				 * 
-				 * index = link.indexOf(connect.getRef()); link =
-				 * link.substring(0, index-1); }
-				 */
 				if (!link.equals("") && !link.endsWith(".css")
 						&& !link.endsWith(".js") && !link.endsWith(".pdf")
 						&& !link.endsWith(".ppt") && !link.endsWith("pptx")
@@ -100,8 +109,6 @@ public class Parser {
 
 				temp1 = ref1[i].split("\"");
 
-				// If temp1[0] has ":" then it is not a valid URL (it must again
-				// point to another link!)
 				temp2 = temp1[0].split(":");
 
 				if (temp2.length < 2) {
@@ -153,6 +160,12 @@ public class Parser {
 
 	}
 
+	/**
+	 * Add the document vector with the document similarity of the given url and tags
+	 * @param url
+	 * @param contentOfPage
+	 * @param tagDV
+	 */
 	public void addvector(String url, String contentOfPage,
 			Map<String, DocumentVector> tagDV) {
 		DocumentVector urlDV = ms.getdocVector(contentOfPage);
@@ -163,6 +176,13 @@ public class Parser {
 
 	}
 
+	/**
+	 * Get the wikipedia document of the given tag
+	 * @param tag
+	 * @return
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
 	public DocumentVector getWikiDV(String tag) throws ClientProtocolException,
 			IOException {
 
@@ -191,13 +211,12 @@ public class Parser {
 		return tagVector;
 	}
 
+	/**
+	 * Serialise the object into a file
+	 * @throws SQLException
+	 */
 	public void serialiseWG() throws SQLException {
 		db = new SeedHandler();
-		/*
-		 * WebGraph wg1; File file = new File(Global.fileName);
-		 * if(file.exists()){ wg1 = new WebGraph(); wg1 =
-		 * (WebGraph)db.deSerializeJavaObjectFromFile(); wg.merge(wg1); }
-		 */
 		Map<String, String> seeds = new HashMap<>();
 		seeds = db.querySeedData();
 		for (Map.Entry<String, String> entry : seeds.entrySet()) {
@@ -209,6 +228,12 @@ public class Parser {
 
 	}
 
+	/**
+	 * Deserialise the object from the file
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
 	public void deserialiseWG() throws SQLException, ClassNotFoundException,
 			IOException {
 		db = new SeedHandler();
@@ -218,16 +243,30 @@ public class Parser {
 
 	}
 
+	/**
+	 * Calculate the probability matrix for every node
+	 * @throws SQLException
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	public void calcProb() throws SQLException, ClientProtocolException,
 			IOException, ClassNotFoundException {
 		Probability prob = new Probability();
 
 		prob.updateDefaultProb(wg);
-		
+
 		MarkovSim ms = new MarkovSim();
 		ms.runSimulation(wg);
 	}
 
+	/**
+	 * Calculate the probability matrix from the serialised object in the file
+	 * @throws SQLException
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	public void calcProbDeserialized() throws SQLException,
 			ClientProtocolException, IOException, ClassNotFoundException {
 		db = new SeedHandler();
@@ -237,11 +276,6 @@ public class Parser {
 		MarkovSim ms = new MarkovSim();
 		ms.runSimulation(wg);
 		db.queryHITS();
-		
-	}
-
-	public int getNumNodes() {
-		return wg.numNodes();
 
 	}
 

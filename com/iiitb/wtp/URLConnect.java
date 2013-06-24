@@ -18,8 +18,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+/**
+ * 
+ * @author Sindhu Priyadarshini
+ * 
+ */
 public class URLConnect {
-	
+
 	String tag = "";
 	MarkovSim ms = new MarkovSim();
 	Parser ObjParse = new Parser();
@@ -31,21 +36,21 @@ public class URLConnect {
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
+	/**
+	 * Start the webcrawling and extract the weblinks
+	 * @param urlLinks
+	 * 			The links in each hop
+	 * @param tagDV
+	 * 			Document Vector for the tags in the seed list
+	 */
+	public void connect(ArrayList<String> urlLinks,
+			Map<String, DocumentVector> tagDV) {
 
-	public void connect(ArrayList<String> urlLinks, Map<String,DocumentVector> tagDV) {
-
-		
-		
-		//Map<String, Map<String, DocumentVector>> list = new HashMap();
 		ArrayList<String> list = new ArrayList<String>();
-		// for(int i=0; i<urlList.size(); i++){
-		// Iterator iter = urlList.entrySet().iterator();
 		for (int i = 0; i < Global.ITERATIONSTEPS; i++) {
 			list.clear();
-			//for (Map.Entry<String, String> entry : urlList.entrySet()) {
 			for (String url : urlLinks) {
-		
-				
+
 				try {
 					HttpHost proxy = new HttpHost("192.16.3.254", 8080, "http");
 					HttpClient client = new DefaultHttpClient();
@@ -64,10 +69,8 @@ public class URLConnect {
 					while ((line = rd.readLine()) != null) {
 						sourceLine = sourceLine + line;
 					}
-				
-					
+
 					list.addAll(ObjParse.parse(sourceLine, url, tagDV));
-						
 
 					rd.close();
 
@@ -77,36 +80,29 @@ public class URLConnect {
 			}
 			urlLinks.clear();
 			urlLinks.addAll(list);
-			
-		}
-		try {
-		String content;
-	
-		for (String string : list) {
-			
-				content = ms.getContent(string);
-			ObjParse.addvector(string, content, tagDV);
 
 		}
-		
-		ObjParse.serialiseWG();
-		ObjParse.calcProb();
+		//Create the document vector for the remaining links
+		try {
+			String content;
+
+			for (String string : list) {
+				content = ms.getContent(string);
+				ObjParse.addvector(string, content, tagDV);
+			}
+			//serialise the webgraph object
+			ObjParse.serialiseWG();
+			//Calculate the probability matrix
+			ObjParse.calcProb();
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		//ObjParse.runMarkovChain();
-		//ObjParse.deserialiseWG();
-		
+
 	}
 }

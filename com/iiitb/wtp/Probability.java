@@ -2,10 +2,18 @@ package com.iiitb.wtp;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * 
+ * @author Puneeth Narayana
+ *
+ */
 public class Probability {
-	private double alpha = 0.15;
+	private double alpha = 0.15; //probability to teleport to another page
 
+	/**
+	 * Calculate the probability matrix for every link 
+	 * @param wg
+	 */
 	public void updateDefaultProb(WebGraph wg) {
 		int numNodes = wg.numNodes();
 		Double weight, weight1,weight2;

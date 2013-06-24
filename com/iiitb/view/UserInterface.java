@@ -24,7 +24,11 @@ import org.apache.http.client.ClientProtocolException;
 import com.iiitb.model.SeedHandler;
 import com.iiitb.wtp.Parser;
 import com.mysql.jdbc.Connection;
-
+/**
+ * 
+ * @author Amulya Kishore
+ *
+ */
 public class UserInterface extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
@@ -32,7 +36,6 @@ public class UserInterface extends JFrame implements ActionListener {
 	JButton enterSeed = new JButton("ENTER SEED");
 	JButton startCrawl = new JButton("START WEBCRAWLING");
 	JButton query = new JButton("QUERY");
-	JButton queryWebsite = new JButton("QUERY WEBSITE");
 
 	JLabel userseed;
 	JLabel userseed_wiki;
@@ -49,9 +52,14 @@ public class UserInterface extends JFrame implements ActionListener {
 	private JTextArea queryURL;
 	private JTextField initialTag;
 
+	/**
+	 * The userinterface constructor which sets the layout for the user to
+	 * interact with the program
+	 */
 	public UserInterface() {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 		setBounds(100, 100, 500, 350);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -85,17 +93,14 @@ public class UserInterface extends JFrame implements ActionListener {
 		contentPane.add(initialTag);
 		initialTag.setColumns(10);
 
-		// creating the objects of SeedHandler
+		// creating the object of SeedHandler and loading the seed data from the
+		// database
 		try {
 			objSeedHandler = new SeedHandler();
 			objSeedHandler.loadData();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		/*
-		 * startCrawl.addActionListener(new ActionListener() { public void
-		 * actionPerformed(ActionEvent arg0) { } });
-		 */
 
 		JLabel lblXcrawler = new JLabel("WEBSITE TAG PROPAGATION");
 		lblXcrawler.setBounds(135, 30, 250, 14);
@@ -104,10 +109,6 @@ public class UserInterface extends JFrame implements ActionListener {
 		startCrawl.setBounds(180, 250, 175, 23);
 		contentPane.add(startCrawl);
 		startCrawl.addActionListener(this);
-
-		// startCrawlExisting.setBounds(180, 250, 175, 23);
-		// contentPane.add(startCrawlExisting);
-		// startCrawlExisting.addActionListener(this);
 
 		enterSeed.setBounds(50, 250, 125, 23);
 		contentPane.add(enterSeed);
@@ -121,7 +122,7 @@ public class UserInterface extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		String tagResult;
-		// Start crawling
+		// Start crawling with input seed data
 		if (e.getSource() == startCrawl) {
 			System.out.println("Webcrawling started!");
 
@@ -167,44 +168,25 @@ public class UserInterface extends JFrame implements ActionListener {
 			} catch (IOException e1) {
 
 				e1.printStackTrace();
-			} 
+			}
 		}
-
+		//Run the simulation on the already crawled data
 		else if (e.getSource() == query) {
-			// getQueryPane();
+
 			Parser p = new Parser();
 			try {
 				p.calcProbDeserialized();
-				
+
 			} catch (ClientProtocolException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (SQLException e2) {
-				// TODO Auto-generated catch block
 				e2.printStackTrace();
 			} catch (IOException e3) {
-				// TODO Auto-generated catch block
 				e3.printStackTrace();
-
 			} catch (ClassNotFoundException e4) {
-				// TODO Auto-generated catch block
 				e4.printStackTrace();
 			}
-		} else if (e.getSource() == queryWebsite) {
-
-			try {
-				objSeedHandler = new SeedHandler();
-				tagResult = objSeedHandler.queryHITSData(queryURL.getText());
-				if (tagResult.equals("")) {
-					tagResult = "No result found";
-				}
-				JOptionPane.showMessageDialog(this, tagResult);
-
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-
-		}
+		} 
 		// Once user click this, the seed will be entered in DB
 		else if (e.getSource() == enterSeed) {
 
@@ -243,8 +225,6 @@ public class UserInterface extends JFrame implements ActionListener {
 
 				}
 
-				// JOptionPane.showMessageDialog(this, "Please wait.... tags");
-
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -252,32 +232,4 @@ public class UserInterface extends JFrame implements ActionListener {
 
 	}
 
-	private void getQueryPane() {
-		contentPane.setVisible(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 500, 350);
-		contentPane1 = new JPanel();
-		contentPane1.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane1);
-		contentPane1.setLayout(null);
-
-		JLabel lblXquery = new JLabel("QUERY");
-		lblXquery.setBounds(200, 50, 250, 14);
-		contentPane1.add(lblXquery);
-
-		query_website = new JLabel("Query Website");
-		query_website.setBounds(70, 125, 120, 25);
-		contentPane1.add(query_website);
-
-		queryURL = new JTextArea();
-		queryURL.setBounds(162, 125, 250, 50);
-		queryURL.setLineWrap(true);
-		contentPane1.add(queryURL);
-		queryURL.setColumns(10);
-
-		queryWebsite.setBounds(80, 250, 140, 23);
-		contentPane1.add(queryWebsite);
-		queryWebsite.addActionListener(this);
-
-	}
 }

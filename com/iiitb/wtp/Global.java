@@ -1,6 +1,14 @@
 package com.iiitb.wtp;
-
+/**
+ * 
+ * @author Sindhu Priyadarshini
+ *
+ */
 public class Global {
-	public static final int ITERATIONSTEPS = 4;
-	public static final String fileName = "iiitb_4_2_4_2306.dat";
+	//Define the number of hops or depth the crawler should run
+	public static final int ITERATIONSTEPS = 5;
+	
+	//The file into which the webgraph object is to be serialised or deserialised from
+	public static final String fileName = "iiitb_5.dat";
+	
 }

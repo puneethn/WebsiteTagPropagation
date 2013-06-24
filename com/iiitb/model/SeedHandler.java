@@ -1,6 +1,5 @@
 package com.iiitb.model;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,30 +25,26 @@ import com.iiitb.wtp.Parser;
 import com.iiitb.wtp.Probability;
 import com.iiitb.wtp.URLConnect;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
-
+/**
+ * 
+ * @author Sindhu Priyadarshini
+ *
+ */
 public class SeedHandler {
 
 	ArrayList<String> urlList = new ArrayList<String>();
-	Map<String, String> urlLinks = new HashMap<>();
 	Map<String, DocumentVector> tagDV = new HashMap<>();
 	Probability prob = new Probability();
 	Parser parse = new Parser();
 	int totalRecords = 0;
 
+	//MySQL connection string
 	Connection conn = null;
 	String dbUrl = "jdbc:mysql://localhost:3306/";
 	String dbName = "wtpdb";
 	String driver = "com.mysql.jdbc.Driver";
 	String userName = "root";
-	String password = "12345";
-
-	public Map<String, String> getUrlLinks() {
-		return urlLinks;
-	}
-
-	public void setUrlLinks(Map<String, String> urlLinks) {
-		this.urlLinks = urlLinks;
-	}
+	String password = "root";
 
 	public Connection getConn() {
 		return conn;
@@ -120,11 +115,10 @@ public class SeedHandler {
 		this.totalRecords = totalRecords;
 	}
 
-	// Constructor: connects to database and loads the seed's (URL's) from the
-	// database.
+	// Constructor: connects to database
 	public SeedHandler() throws SQLException {
 		connectDatabase();
-		// loadData(conn);
+		
 	}
 
 	// Connects to the database
@@ -139,6 +133,10 @@ public class SeedHandler {
 		}
 	}
 
+	/**
+	 * The crawler is started with seed data that is present in the urlList
+	 * and calculate the amount of time it takes to crawl and propagate the tags
+	 */
 	public void mainCrawler() {
 
 		try {
@@ -160,9 +158,7 @@ public class SeedHandler {
 			System.out.println("Total Time taken in minutes " + TotalT);
 
 			queryHITS();
-			// queryTotalRecords();
-			// prob.updateDefaultProb(totalRecords);
-
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} 
@@ -190,7 +186,6 @@ public class SeedHandler {
 		try {
 			while (rs.next()) {
 				urlList.add(rs.getString(2));
-				urlLinks.put(rs.getString(2), rs.getString(3));
 				String[] tags = rs.getString(3).split(",");
 				for (String string : tags) {
 
@@ -198,60 +193,19 @@ public class SeedHandler {
 				}
 			}
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 
 	}
 
-	public void queryTotalRecords() throws SQLException {
-		Statement stmt = null;
-		ResultSet rs = null;
-		String query = "";
-		stmt = conn.createStatement();
-		System.out.println("Querying the database");
-
-		query = "select count(*) from webgraph";
-
-		if (stmt.execute(query)) {
-
-			rs = stmt.getResultSet();
-			totalRecords = rs.getInt(1);
-
-		} else {
-			System.err.println("select failed");
-		}
-
-	}
-
-	public String queryHITSData(String queryURL) throws SQLException {
-		Statement stmt = null;
-		ResultSet rs = null;
-		String query = "";
-		stmt = conn.createStatement();
-		System.out.println("Querying the database");
-
-		query = "select tag from HITS where url =\"" + queryURL + "\"";
-
-		if (stmt.execute(query)) {
-			rs = stmt.getResultSet();
-		} else {
-			System.err.println("select failed");
-		}
-		String tag = "";
-		while (rs.next()) {
-			tag = tag + rs.getString(1);
-		}
-
-		return tag;
-
-	}
-
-	// The Final Output of the suggested websites.
-
+	/**
+	 *  The Final Output of the suggested websites.
+	 * @throws SQLException
+	 */
 	public void queryHITS() throws SQLException {
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -266,17 +220,16 @@ public class SeedHandler {
 		} else {
 			System.err.println("select failed");
 		}
-		// String tag = "";
+	
 		int sno = 1;
 		while (rs.next()) {
-			// tag = tag + rs.getString(1);
 			System.out.println(sno + " " + rs.getString(2) + " "
 					+ rs.getString(3));
 			sno++;
 		}
 	}
 
-	// Querying from seed list
+	// Querying from seed list to serialise along with the crawled data
 	public Map<String, String> querySeedData() throws SQLException {
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -345,7 +298,7 @@ public class SeedHandler {
 			// Also keep the url in the arraylist
 			if (!urlList.contains(userUrl))
 				urlList.add(userUrl);
-			urlLinks.put(userUrl, tagUpdate);
+		
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			e.printStackTrace();
 		} catch (Exception e1) {
@@ -354,25 +307,13 @@ public class SeedHandler {
 
 	}
 
-	// Inserts the webgraph table data into database
-	public void insertwebGraph(String inlink, String outlink)
-			throws SQLException {
-		try {
 
-			String sql = "INSERT INTO webgraph(inlink, outlink) VALUES(?, ?)";
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, inlink);
-			pstmt.setString(2, outlink);
-			pstmt.executeUpdate();
-
-		} catch (MySQLIntegrityConstraintViolationException e) {
-			System.out.println("Duplicate from " + inlink + " to " + outlink);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-	}
-
-	// Inserts the HITS data into database
+	/**
+	 * Inserts the HITS data into database - output
+	 * @param userUrl
+	 * @param tag
+	 * @throws SQLException
+	 */
 	public void insertHITSData(String userUrl, String tag) throws SQLException {
 
 		try {

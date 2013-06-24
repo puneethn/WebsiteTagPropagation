@@ -2,15 +2,21 @@ package com.iiitb.wtp;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * 
+ * Ref : http://www.stackoverflow.com
+ *
+ */
 public class DocumentVector {
 	Map<String, Integer> wordMap = new HashMap<String, Integer>();
-
+	
+	//Get the frequency of the words in the document
 	public void incCount(String word) {
 		Integer oldCount = wordMap.get(word);
 		wordMap.put(word, oldCount == null ? 1 : oldCount + 1);
 	}
 
+	//Get cosine similarity between two vectors
 	double getCosineSimilarityWith(DocumentVector otherVector) {
 		double innerProduct = 0;
 		double cosSim = 0.0;

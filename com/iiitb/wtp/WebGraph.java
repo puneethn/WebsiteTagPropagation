@@ -1,32 +1,29 @@
 package com.iiitb.wtp;
 
-// HOST TABLE -> INDEX TABLE(A,B) -> Page TABLE
 
 import java.io.*;
 import java.util.*;
 
 /**
- * This class implements a memory Data Structure for storing graphs.</p>
- * <p>
+ * This class implements a memory Data Structure for storing graphs.</p><p>
  * 
- * A large amount of research has recently focused on the graph structure (or
- * link structure) of the World Wide Web, which has proven to be extremely
- * useful for improving the performance of search engines and other tools for
- * navigating the web. For example, the Pagerank algorithm of Brin and Page,
- * used in the Google search engine, and the HITS algorithm of Kleinberg both
- * rank pages according to the number and importance of other pages that link to
- * them.
- * </p>
- * <p>
+ * A large amount of research has recently focused on the graph structure (or link structure)
+ * of the World Wide Web, which has proven to be extremely useful for improving the
+ * performance of search engines and other tools for navigating the web.
+ * For example, the Pagerank algorithm of Brin and Page, used in the Google search
+ * engine, and the HITS algorithm of Kleinberg both rank pages according to the 
+ * number and importance of other pages that link to them.</p><p>
  * 
- * This class provides the methods needed to efficiently compute with graphs and
- * to experiment with such algorithms, using main memory for storage.
- * 
+ * This class provides the methods needed to efficiently compute with graphs and to
+ * experiment with such algorithms, using main memory for storage.
+ *
+ * @author Bruno Martins
+ * modified by Sindhu Priyadarshini
  */
 public class WebGraph implements Serializable {
 
 	/**
-	 * 
+	 * default serial id for serialising or deserialising the object
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -48,12 +45,17 @@ public class WebGraph implements Serializable {
 	 * stored, containing for each inlink an associated "connection weight"
 	 */
 	private Map OutLinks;
-
+	
+	
+	/**
+	 * Document similarity of the url and the tag
+	 */
 	private Map<Integer, Map<String, Double>> DocSim = new HashMap<Integer, Map<String, Double>>();
 
 	/** The number of nodes in the graph */
 	private int nodeCount;
 
+	//Seed data that requires to be stored in the file for which the crawling was run
 	private String seed_url;
 	private String tags;
 
@@ -77,60 +79,12 @@ public class WebGraph implements Serializable {
 	 * Constructor for WebGraph
 	 * 
 	 */
-
-	public void print() {
-	
-		for (Object obj : OutLinks.entrySet()) {
-			System.out.println(obj.toString() + " out");
-		}
-	}
-
 	public WebGraph() {
 		IdentifyerToURL = new HashMap();
 		URLToIdentifyer = new HashMap();
 		// InLinks = new HashMap();
 		OutLinks = new HashMap();
 		nodeCount = 0;
-	}
-
-	/**
-	 * Constructor for WebGraph, reading data from a text file. Each line of the
-	 * file contains an association in the form:
-	 * 
-	 * http://url1.com -> http://url2.com 1.0
-	 * 
-	 * Stating that "http://url1.com" contains an outlink to "http://url2.com",
-	 * with an associated connection strength of 1.0
-	 * 
-	 * @param aux
-	 *            The name of the file
-	 * @throws IOException
-	 *             An error occured while reading the file
-	 * @throws FileNotFoundException
-	 *             An error occured while reading the file
-	 */
-	public WebGraph(File file) throws IOException, FileNotFoundException {
-		this();
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		String line;
-		while ((line = reader.readLine()) != null) {
-			int index1 = line.indexOf("->");
-			if (index1 == -1)
-				addLink(line.trim());
-			else {
-				String url1 = line.substring(0, index1).trim();
-				String url2 = line.substring(index1 + 2).trim();
-				Double strength = new Double(1.0);
-				index1 = url2.indexOf(" ");
-				if (index1 != -1)
-					try {
-						strength = new Double(url2.substring(index1 + 1).trim());
-						url2 = url2.substring(0, index1).trim();
-					} catch (Exception e) {
-					}
-				addLink(url1, url2, strength);
-			}
-		}
 	}
 
 	/**
@@ -183,7 +137,6 @@ public class WebGraph implements Serializable {
 		Integer id = URLToIdentifyer(link);
 		if (id == null) {
 			id = new Integer(nodeCount++);
-			// System.out.println(id + " id" + link + " link");
 			String host;
 			String name;
 			int index = 0, index2 = 0;
@@ -205,7 +158,6 @@ public class WebGraph implements Serializable {
 			map.put(name, id);
 			URLToIdentifyer.put(link, map);
 			IdentifyerToURL.put(id, link);
-			// InLinks.put(id,new HashMap());
 			OutLinks.put(id, new HashMap());
 		}
 	}
@@ -258,6 +210,11 @@ public class WebGraph implements Serializable {
 
 	}
 
+	/**
+	 * Returns a map of the tag and document similarity for the given url
+	 * @param link
+	 * @return
+	 */
 	public Map<String, Double> DocSim(Integer link) {
 		if (link == null)
 			return new HashMap();
@@ -366,14 +323,12 @@ public class WebGraph implements Serializable {
 		return nodeCount;
 	}
 
-	public void merge(WebGraph wg1) {
-		this.IdentifyerToURL.putAll(wg1.IdentifyerToURL);
-		this.nodeCount = this.nodeCount + wg1.nodeCount;
-		this.OutLinks.putAll(wg1.OutLinks);
-		this.URLToIdentifyer.putAll(wg1.URLToIdentifyer);
-
-	}
-
+	/**
+	 * Store the document similarity score for the corresponding url and tag
+	 * @param link
+	 * @param tag
+	 * @param docSimScore
+	 */
 	public void addVector(String link, String tag, Double docSimScore) {
 		Map<String, Double> tagSim = new HashMap();
 		addLink(link);

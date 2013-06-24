@@ -27,15 +27,17 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import com.iiitb.model.SeedHandler;
-
+/**
+ * 
+ * @co-author Puneeth Narayana, Amulya Kishore and Sindhu Priyadarshini
+ *
+ */
 public class MarkovSim {
 
 	public void runSimulation(WebGraph wg) throws SQLException,
 			ClientProtocolException, IOException {
 		SeedHandler db = new SeedHandler();
-		// Map<Integer, Double> tagSimVector = new HashMap<>();
 		Map<String, String> outputTags = new HashMap<>();
-		// Map<String, String> seedData = new HashMap<String, String>();
 		Double combinedScore = 0.0;
 		Double sum = 0.0;
 		Double sim = 0.0;
@@ -144,8 +146,8 @@ public class MarkovSim {
 			String tags = "";
 			for (Integer i = 0; i < wg.numNodes(); i++) {
 				count = hitsvector1.getCount(i.toString());
-
-				if (count > 6 * (10000 / wg.numNodes())) {
+				System.out.println(count + " "+ wg.IdentifyerToURL(i));
+				if (count > 4 * (10000 / wg.numNodes())) {
 					if (outputTags.containsKey(wg.IdentifyerToURL(i))) {
 						tags = outputTags.get(wg.IdentifyerToURL(i)) + ", "
 								+ tag;
